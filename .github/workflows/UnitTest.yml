@@ -40,6 +40,9 @@ jobs:
             version: '1'
             arch: x86
           - os: macos-latest
+            version: '1.9'
+            arch: aarch64
+          - os: macos-latest
             version: '1'
             arch: aarch64
           - os: macos-latest

@@ -2,6 +2,7 @@ using ColorTypes
 using ColorTypes.FixedPointNumbers
 using Test
 using Aqua
+using BenchmarkTools
 
 # Re-run inference-related tests in CI with the "inference" test argument
 if "inference" in ARGS
@@ -29,6 +30,10 @@ end
 
 using Documenter
 doctest(ColorTypes, manual = false)
+
+@testset "pure" begin
+    @btime ccolor(RGB{T1}, HSV{T2}) setup=(T1=rand([N0f8, Float32, Float64]); T2=rand([Float32, Float64]))
+end
 
 @testset "StyledStringsExt" begin
     if isdefined(Base, :get_extension)

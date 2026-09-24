@@ -2,13 +2,38 @@ using ColorTypes
 using ColorTypes.FixedPointNumbers
 using Test
 using Aqua
+using BenchmarkTools
+
+# Re-run inference-related tests in CI with the "inference" test argument
+if "inference" in ARGS
+    @testset "inference" begin
+        include("types.jl")
+        include("traits.jl")
+        include("operations.jl")
+    end
+    exit(0)
+end
+
+# The generation of coverage data might affect the type inference.
+# For this reason, when code coverage is enabled, `@inferred` is forced to pass through.
+if Base.JLOptions().code_coverage != 0
+    macro inferred(ex) # pass-through
+        return esc(ex)
+    end
+end
 
 @testset "Aqua tests" begin
-    Aqua.test_all(ColorTypes)
+    Aqua.test_all(ColorTypes, unbound_args=false)
+    is_dev = occursin("DEV", string(VERSION))
+    Aqua.test_unbound_args(ColorTypes, broken=is_dev)
 end
 
 using Documenter
 doctest(ColorTypes, manual = false)
+
+@testset "pure" begin
+    @btime ccolor(RGB{T1}, HSV{T2}) setup=(T1=rand([N0f8, Float32, Float64]); T2=rand([Float32, Float64]))
+end
 
 @testset "StyledStringsExt" begin
     if isdefined(Base, :get_extension)

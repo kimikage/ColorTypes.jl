@@ -45,6 +45,10 @@ jobs:
             arch: aarch64
     steps:
       - uses: actions/checkout@v7
+      - name: Install CUDA Toolkit
+        uses: Jimver/cuda-toolkit@v0.2.36
+      - name: Verify CUDA installation
+        run: nvcc --version
       - uses: julia-actions/setup-julia@v3
         with:
           version: ${{ matrix.version }}

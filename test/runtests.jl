@@ -2,6 +2,28 @@ using ColorTypes
 using ColorTypes.FixedPointNumbers
 using Test
 using Aqua
+using CUDA
+
+function mwe()  # illegal address error (700) on CUDA
+    img = [RGB(0,0,0)]
+    XYZ.(cu(img))
+end
+
+function ok1()  # no issue
+    img = [RGB{Float32}(0,0,0)]
+    XYZ.(cu(img))
+end
+
+function ok2()  # no issue
+    dat = zeros(N0f8, 1)
+    Float32.(cu(dat))
+end
+
+@testset "CUDA tests" begin
+    @show ok1()
+    @show ok2()
+    @show mwe()
+end
 
 @testset "Aqua tests" begin
     Aqua.test_all(ColorTypes)

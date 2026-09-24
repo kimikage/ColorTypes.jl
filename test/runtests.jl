@@ -2,6 +2,32 @@ using ColorTypes
 using ColorTypes.FixedPointNumbers
 using Test
 using Aqua
+using Metal
+
+function kernel!(img)
+    img[1] = RGB{Float32}(RGB{N0f8}(0.847, 0.749, 0.847))
+    return
+end
+
+function kernel_t!(img::AbstractArray{C}) where C<:Colorant
+    @inbounds img[1] = C(RGB{N0f8}(0.847, 0.749, 0.5))
+    return
+end
+
+a = Array{RGB{Float32}}(undef, 1)
+kernel!(a)
+@show a
+
+kernel_t!(a)
+@show a
+
+b = MtlArray{RGB{Float32}}(undef, 1)
+
+@metal kernel_t!(b)
+@show b
+
+@metal kernel!(b)
+@show b
 
 # Re-run inference-related tests in CI with the "inference" test argument
 if "inference" in ARGS

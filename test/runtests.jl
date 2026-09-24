@@ -9,6 +9,11 @@ function kernel!(img)
     return
 end
 
+function kernel_f32!(img::AbstractArray{RGB{Float32}})
+    img[1] = RGB{Float32}(RGB{N0f8}(0.847, 0.749, 0.2))
+    return
+end
+
 function kernel_t!(img::AbstractArray{C}) where C<:Colorant
     @inbounds img[1] = C(RGB{N0f8}(0.847, 0.749, 0.5))
     return
@@ -22,6 +27,9 @@ kernel_t!(a)
 @show a
 
 b = MtlArray{RGB{Float32}}(undef, 1)
+
+@metal kernel_f32!(b)
+@show b
 
 @metal kernel_t!(b)
 @show b

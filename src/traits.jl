@@ -145,10 +145,16 @@ end
 function eltypes_supported(::Type{C}) where {C<:Colorant}
     Cb = base_colorant_type(C)
     isconcretetype(C) && C === Cb && return eltype(C)
-    _eltypes_supported(Cb, supertype(Cb))
+    _eltypes_supported(Cb)
 end
-@pure _eltypes_supported(::Type{<:Colorant}, ::Type{C}) where {C<:Colorant} = _eltypes_supported(C, supertype(C))
-_eltypes_supported(::Type{C}, ::Type) where {C<:Colorant} = _parameter_upper_bound(C, 1)
+@pure function _eltypes_supported(::Type{C}) where {C<:Colorant}
+    SC = supertype(C)
+    SC === Any && return _eltypes_supported_ub(C)
+    _eltypes_supported(SC)
+end
+_eltypes_supported_ub(::Type{C}) where {C<:Colorant} = _parameter_upper_bound(C, 1)
+_eltypes_supported_ub(::Type{Colorant{T} where T<:Fractional}) = Fractional
+_eltypes_supported_ub(::Type{Colorant{T} where T<:AbstractFloat}) = AbstractFloat
 
 eltypes_supported(c::Colorant) = eltypes_supported(typeof(c))
 
@@ -416,6 +422,7 @@ convert(::Type{C}, p::Colorant) where C<:Colorant = cnvt(ccolor(C,typeof(p)), p)
 where `cnvt` is the function that performs explicit conversion.
 """
 function ccolor(::Type{Cdest}, ::Type{Csrc}) where {Cdest<:Colorant, Csrc<:Union{Number,Colorant}}
+    isconcretetype(Cdest) && Csrc <: Colorant && return Cdest
     Cdestalpha, Cdestbase, Tdest = colorsplit(Cdest)
     if Csrc <: Number
         Cdestbase <: Union{AbstractGray, AbstractRGB} || throw(ColorTypeResolutionError(:ccolor, "no automatic conversion from", Csrc, Cdestbase))
